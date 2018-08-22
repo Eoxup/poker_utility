@@ -1,5 +1,4 @@
 import random
-import time
 import itertools
 
 map_card_to_value = {"A" : 14, "K" : 13, "Q" : 12, "J" : 11, "T" : 10, "9" : 9, "8" : 8, "7" : 7, "6" : 6, "5" : 5, "4" : 4, "3" : 3, "2" : 2}
@@ -73,17 +72,17 @@ all_hand_cards_term = [
 ]
 
 
-CARD_ROYAL_FLUSH        = 10
-CARD_FLUSH_STRAIGHT     = 9
-CARD_FOUR_OF_A_KIND     = 8
-CARD_FULLHOUSE          = 7
-CARD_FLUSH              = 6
-CARD_STRAIGHT           = 5
-CARD_THREE_OF_A_KIND    = 4
-CARD_TWO_PAIR           = 3
-CARD_ONE_PAIR           = 2
-CARD_HIGH_CARD          = 1
 CARD_NO_RANK            = 0
+CARD_HIGH_CARD          = 1
+CARD_ONE_PAIR           = 2
+CARD_TWO_PAIR           = 3
+CARD_THREE_OF_A_KIND    = 4
+CARD_STRAIGHT           = 5
+CARD_FLUSH              = 6
+CARD_FULLHOUSE          = 7
+CARD_FOUR_OF_A_KIND     = 8
+CARD_FLUSH_STRAIGHT     = 9
+CARD_ROYAL_FLUSH        = 10
 
 
 listCardRankString = [
@@ -118,15 +117,17 @@ def get_card_value(x):
 
 
 def get_flush_info(cards):
-    suit = {}
-    suit["S"] = 0
-    suit["H"] = 0
-    suit["D"] = 0
-    suit["C"] = 0
+    suit = {
+        "S" : 0,
+        "H" : 0,
+        "D" : 0,
+        "C" : 0
+    }
     
-    flush_info = {}
-    flush_info["suit"] = ""
-    flush_info["cards"] = []
+    flush_info = {
+        "suit" : "",
+        "cards" : []
+    }
     
     for x in cards:
         flush_suit = x[1]
@@ -143,20 +144,20 @@ def get_flush_info(cards):
     return flush_info
 
 
-def get_straight_info(cards):
-    straight_arr = [0] * 15
+def get_straight_info(cards_value):
+    straight_arr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     
-    for x in cards:
-        straight_arr[get_card_value(x)] = 1
+    for x in cards_value:
+        straight_arr[x] = 1
     
-    if straight_arr[14] == 1:
+    if straight_arr[14]:
         straight_arr[1] = 1
     
     straight_sum = sum(straight_arr[0:5])
     for i in range(10):
         straight_sum = straight_sum - straight_arr[i] + straight_arr[i+5]
         if straight_sum == 5:
-            return i+5
+            return i + 5
     
     return 0
 
@@ -169,17 +170,17 @@ def get_seven_set_rank(cards_info):
     # CARD_FLUSH_STRAIGHT
     # CARD_ROYAL_FLUSH
     
-    cards_rank = {}
-    cards_rank["rank"] = CARD_NO_RANK
-    cards_rank["info"] = []
+    cards_rank = {
+        "rank" : CARD_NO_RANK,
+        "info" : []
+    }
     
-    cards_value = cards_info["value"]
     flush_info = cards_info["flush"]
     straight_info = cards_info["straight"]
-    flush_straight_info = cards_info["flush_straight"]
     
     if flush_info["suit"]:
-        if flush_straight_info != 0:
+        flush_straight_info = cards_info["flush_straight"]
+        if not flush_straight_info:
             if flush_straight_info == 14:
                 cards_rank["rank"] = CARD_ROYAL_FLUSH
             else:
@@ -187,14 +188,13 @@ def get_seven_set_rank(cards_info):
                 cards_rank["info"] = [flush_straight_info]
         else:
             cards_rank["rank"] = CARD_FLUSH
-            cards_rank["info"] = [get_card_value(x) for x in cards_info["flush"]["cards"]]
-            
-    elif straight_info != 0:
+            cards_rank["info"] = [get_card_value(x) for x in cards_info["flush"]["cards"][0:5]]
+    elif not straight_info:
         cards_rank["rank"] = CARD_STRAIGHT
         cards_rank["info"] = [straight_info]
     else:
         cards_rank["rank"] = CARD_HIGH_CARD
-        cards_rank["info"] = cards_value[0:5]
+        cards_rank["info"] = cards_info["value"][0:5]
     
     return cards_rank
     
@@ -207,17 +207,17 @@ def get_six_set_rank(cards_info):
     # CARD_FLUSH_STRAIGHT
     # CARD_ROYAL_FLUSH
     
-    cards_rank = {}
-    cards_rank["rank"] = CARD_NO_RANK
-    cards_rank["info"] = []
+    cards_rank = {
+        "rank" : CARD_NO_RANK,
+        "info" : []
+    }
     
-    cards = cards_info["cards"]
     flush_info = cards_info["flush"]
     straight_info = cards_info["straight"]
-    flush_straight_info = cards_info["flush_straight"]
     
     if flush_info["suit"]:
-        if flush_straight_info != 0:
+        flush_straight_info = cards_info["flush_straight"]
+        if not flush_straight_info:
             if flush_straight_info == 14:
                 cards_rank["rank"] = CARD_ROYAL_FLUSH
             else:
@@ -225,15 +225,13 @@ def get_six_set_rank(cards_info):
                 cards_rank["info"] = [flush_straight_info]
         else:
             cards_rank["rank"] = CARD_FLUSH
-            cards_rank["info"] = [get_card_value(x) for x in cards_info["flush"]["cards"]]
-            
-    elif straight_info != 0:
+            cards_rank["info"] = [get_card_value(x) for x in cards_info["flush"]["cards"][0:5]]
+    elif not straight_info:
         cards_rank["rank"] = CARD_STRAIGHT
         cards_rank["info"] = [straight_info]
     else:
         cards_rank["rank"] = CARD_ONE_PAIR
-        cards_rank_info = [cards_info["two"][0][0]] + cards_info["one"][0:4]
-        cards_rank["info"] = [get_card_value(x) for x in cards_rank_info]
+        cards_rank["info"] = cards_info["two"] + cards_info["one"][0:3]
     
     return cards_rank
     
@@ -248,17 +246,17 @@ def get_five_set_rank(cards_info):
     # CARD_FLUSH_STRAIGHT
     # CARD_ROYAL_FLUSH
     
-    cards_rank = {}
-    cards_rank["rank"] = CARD_NO_RANK
-    cards_rank["info"] = []
+    cards_rank = {
+        "rank" : CARD_NO_RANK,
+        "info" : []
+    }
     
-    cards = cards_info["cards"]
     flush_info = cards_info["flush"]
     straight_info = cards_info["straight"]
-    flush_straight_info = cards_info["flush_straight"]
     
     if flush_info["suit"]:
-        if flush_straight_info != 0:
+        flush_straight_info = cards_info["flush_straight"]
+        if not flush_straight_info:
             if flush_straight_info == 14:
                 cards_rank["rank"] = CARD_ROYAL_FLUSH
             else:
@@ -266,19 +264,16 @@ def get_five_set_rank(cards_info):
                 cards_rank["info"] = [flush_straight_info]
         else:
             cards_rank["rank"] = CARD_FLUSH
-            cards_rank["info"] = [get_card_value(x) for x in cards_info["flush"]["cards"]]
-            
-    elif straight_info != 0:
+            cards_rank["info"] = [get_card_value(x) for x in cards_info["flush"]["cards"][0:5]]
+    elif not straight_info:
         cards_rank["rank"] = CARD_STRAIGHT
         cards_rank["info"] = [straight_info]
-    elif cards_info["three"]:
-        cards_rank["rank"] = CARD_THREE_OF_A_KIND
-        cards_rank_info = [cards_info["three"][0][0]] + cards_info["one"][0:2]
-        cards_rank["info"] = [get_card_value(x) for x in cards_rank_info]
     elif cards_info["two"]:
         cards_rank["rank"] = CARD_TWO_PAIR
-        cards_rank_info = [cards_info["two"][0][0], cards_info["two"][1][0], cards_info["one"][0]]
-        cards_rank["info"] = [get_card_value(x) for x in cards_rank_info]
+        cards_rank["info"] = cards_info["two"] + cards_info["one"][0:1]
+    elif cards_info["three"]:
+        cards_rank["rank"] = CARD_THREE_OF_A_KIND
+        cards_rank["info"] = cards_info["three"] + cards_info["one"][0:2]
     
     return cards_rank
     
@@ -291,25 +286,23 @@ def get_four_set_rank(cards_info):
     # CARD_FULLHOUSE
     # CARD_FOUR_OF_A_KIND
     
-    cards_rank = {}
-    cards_rank["rank"] = CARD_NO_RANK
-    cards_rank["info"] = []
+    cards_rank = {
+        "rank" : CARD_NO_RANK,
+        "info" : []
+    }
     
-    cards = cards_info["cards"]
-    if cards_info["four"]:
-        cards_rank["rank"] = CARD_FOUR_OF_A_KIND
-        cards_rank_info = [cards_info["four"][0][0], cards_info["one"][0]]
-    elif cards_info["three"]:
+    if cards_info["three"]:
         cards_rank["rank"] = CARD_FULLHOUSE
-        cards_rank_info = [cards_info["three"][0][0], cards_info["two"][0][0]]
+        cards_rank["info"] = cards_info["three"] + cards_info["two"]
+    elif cards_info["four"]:
+        cards_rank["rank"] = CARD_FOUR_OF_A_KIND
+        cards_rank["info"] = cards_info["four"] + cards_info["one"][0:1]
     else:
         cards_rank["rank"] = CARD_TWO_PAIR
-        if get_card_value(cards_info["two"][2][0]) > get_card_value(cards_info["one"][0]):
-            cards_rank_info = [cards_info["two"][0][0], cards_info["two"][1][0], cards_info["two"][2][0]]
+        if cards_info["two"][2] > cards_info["one"][0]:
+            cards_rank["info"] = cards_info["two"]
         else:
-            cards_rank_info = [cards_info["two"][0][0], cards_info["two"][1][0], cards_info["one"][0]]
-    
-    cards_rank["info"] = [get_card_value(x) for x in cards_rank_info]
+            cards_rank["info"] = cards_info["two"][0:2] + cards_info["one"]
     
     return cards_rank
     
@@ -321,24 +314,23 @@ def get_three_set_rank(cards_info):
     # CARD_FULLHOUSE
     # CARD_FOUR_OF_A_KIND
     
-    cards_rank = {}
-    cards_rank["rank"] = CARD_NO_RANK
-    cards_rank["info"] = []
+    cards_rank = {
+        "rank" : CARD_NO_RANK,
+        "info" : []
+    }
     
     if cards_info["four"]:
         cards_rank["rank"] = CARD_FOUR_OF_A_KIND
-        if get_card_value(cards_info["two"][0][0]) > get_card_value(cards_info["one"][0]):
-            cards_rank_info = [cards_info["four"][0][0], cards_info["two"][0][0]]
+        if cards_info["two"] > cards_info["one"]:
+            cards_rank["info"] = cards_info["four"] + cards_info["two"]
         else:
-            cards_rank_info = [cards_info["four"][0][0], cards_info["one"][0]]
+            cards_rank["info"] = cards_info["four"] + cards_info["one"]
     else:
         cards_rank["rank"] = CARD_FULLHOUSE
         if cards_info["two"]:
-            cards_rank_info = [cards_info["three"][0][0], cards_info["two"][0][0]]
+            cards_rank["info"] = cards_info["three"] + cards_info["two"][0:1]
         else:
-            cards_rank_info = [cards_info["three"][0][0], cards_info["three"][1][0]]
-    
-    cards_rank["info"] = [get_card_value(x) for x in cards_rank_info]
+            cards_rank["info"] = cards_info["three"]
     
     return cards_rank
     
@@ -347,68 +339,53 @@ def get_two_set_rank(cards_info):
     # AAAABBB
     # CARD_FOUR_OF_A_KIND
     
-    cards_rank = {}
-    cards_rank["rank"] = CARD_NO_RANK
-    cards_rank["info"] = []
-    
-    cards_rank["rank"] = CARD_FOUR_OF_A_KIND
-    cards_rank_info = [cards_info["four"][0][0], cards_info["three"][0][0]]
-    cards_rank["info"] = [get_card_value(x) for x in cards_rank_info]
+    cards_rank = {
+        "rank" : CARD_FOUR_OF_A_KIND,
+        "info" : cards_info["four"] + cards_info["three"]
+    }
     
     return cards_rank
     
     
 def get_cards_info(cards):
-    cards_info = {}
-    cards_info["cards"] = cards
-    cards_info["value"] = [get_card_value(x) for x in cards]
-    cards_info["set"] = len(set(cards_info["value"]))
-    cards_info["flush"] = {}
-    cards_info["flush"]["suit"] = ""
-    cards_info["flush"]["cards"] = []
-    cards_info["straight"] = 0
-    cards_info["flush_straight"] = 0
-    cards_info["one"] = []
-    cards_info["two"] = []
-    cards_info["three"] = []
-    cards_info["four"] = []
+    cards_value = [get_card_value(x) for x in cards]
+    cards_info = {
+        "cards" : cards,
+        "value" : cards_value,
+        "set" : len(set(cards_value)),
+        "flush" : {"suit" : "", "cards" : ""},
+        "straight" : 0,
+        "flush_straight" : 0,
+        "one" : [],
+        "two" : [],
+        "three" : [],
+        "four" : []
+    }
     
     cards_set = cards_info["set"]
     if cards_set >= 5:
         cards_info["flush"] = get_flush_info(cards)
-        cards_info["straight"] = get_straight_info(cards)
-        if cards_info["flush"]["suit"]:
-            cards_info["flush_straight"] = get_straight_info(cards_info["flush"]["cards"])
+        cards_info["straight"] = get_straight_info(cards_value)
+        if cards_info["flush"]["suit"] and cards_info["straight"] != 0:
+            flush_cards_value = [get_card_value(x) for x in cards_info["flush"]["cards"]]
+            cards_info["flush_straight"] = get_straight_info(flush_cards_value)
     
-    cards_class = {
-        "A" : [],
-        "K" : [],
-        "Q" : [],
-        "J" : [],
-        "T" : [],
-        "9" : [],
-        "8" : [],
-        "7" : [],
-        "6" : [],
-        "5" : [],
-        "4" : [],
-        "3" : [],
-        "2" : []
-    }
-
-    for x in cards:
-        cards_class[x[0]] = cards_class[x[0]] + [x]
-    
-    for k in ["A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2"]:
-        cards_count = len(cards_class[k])
-        if cards_count == 1:
-            cards_info["one"] = cards_info["one"] + cards_class[k]
-        elif cards_count == 2:
-            cards_info["two"] = cards_info["two"] + [cards_class[k]]
-        elif cards_count == 3:
-            cards_info["three"] = cards_info["three"] + [cards_class[k]]
-        elif cards_count == 4:
-            cards_info["four"] = cards_info["four"] + [cards_class[k]]
+    x = cards_value[0]
+    c = 1
+    for y in cards_value[1:] + [0]:
+        if x == y:
+            c = c + 1
+        else:
+            if c == 1:
+                cards_info["one"] = cards_info["one"] + [x]
+            elif c == 2:
+                cards_info["two"] = cards_info["two"] + [x]
+            elif c == 3:
+                cards_info["three"] = cards_info["three"] + [x]
+            elif c == 4:
+                cards_info["four"] = cards_info["four"] + [x]
+            c = 1
+        x = y
     
     return cards_info
     
@@ -416,6 +393,7 @@ def get_cards_info(cards):
 def get_seven_cards_rank(cards):
     cards_info = get_cards_info(cards)
     cards_set = cards_info["set"]
+    
     if cards_set == 7:
         return get_seven_set_rank(cards_info)
     elif cards_set == 6:
@@ -430,7 +408,7 @@ def get_seven_cards_rank(cards):
         return get_two_set_rank(cards_info)
 
 
-def get_my_rank(public_cards, hand_cards):
+def get_my_cards_rank(public_cards, hand_cards):
     cards = public_cards + hand_cards
     cards = sorted(cards, key=get_card_value, reverse=True)
     cards_rank = get_seven_cards_rank(cards)
@@ -446,13 +424,10 @@ def is_better_hand_cards(public_cards, hand_cards, my_cards_rank):
     if cards_rank["rank"] > my_cards_rank["rank"]:
         return True
     elif cards_rank["rank"] == my_cards_rank["rank"]:
-        for i in range(len(my_cards_rank["info"])):
-            if cards_rank["info"][i] > my_cards_rank["info"][i]:
-                return True
-            elif cards_rank["info"][i] < my_cards_rank["info"][i]:
-                return False
-    
-    return False
+        if cards_rank["info"] > my_cards_rank["info"]:
+            return True
+        else:
+            return False
 
 
 def get_win_rate(public_cards, hand_cards, my_cards_rank):
@@ -474,17 +449,17 @@ def get_win_rate(public_cards, hand_cards, my_cards_rank):
     
     
 def simulate_win_rate(public_cards, hand_cards):
-    result = {}
-    result["win_rate"] = 0.0
-    result["rank_info"] = {}
+    result = {
+        "win_rate" : 0.0,
+        "rank_info" : {}
+    }
     
-    simulated_times = 80
+    simulated_times = 100
     
     known_cards = public_cards + hand_cards
     all_cards_term = map_card_term_to_num.keys()
     unknown_cards = list(set(all_cards_term).difference(known_cards))
     len_public_cards = len(public_cards)
-    
     
     if len_public_cards == 3:    # Flop
         simulated_hand_cards = [list(x) for x in itertools.combinations(unknown_cards, 2)]
@@ -495,7 +470,7 @@ def simulate_win_rate(public_cards, hand_cards):
         
         for n in range(flop_simulate_times):
             simulated_public_cards = public_cards + simulated_hand_cards[n]
-            simulated_cards_rank = get_my_rank(simulated_public_cards, hand_cards)
+            simulated_cards_rank = get_my_cards_rank(simulated_public_cards, hand_cards)
             if simulated_cards_rank["rank"] == CARD_ROYAL_FLUSH:
                 win_rate = win_rate + 1.0
             else:
@@ -510,7 +485,7 @@ def simulate_win_rate(public_cards, hand_cards):
         
         for n in range(turn_simulate_times):
             simulated_public_cards = public_cards + [unknown_cards[n]]
-            simulated_cards_rank = get_my_rank(simulated_public_cards, hand_cards)
+            simulated_cards_rank = get_my_cards_rank(simulated_public_cards, hand_cards)
             if simulated_cards_rank["rank"] == CARD_ROYAL_FLUSH:
                 win_rate = win_rate + 1.0
             else:
@@ -518,8 +493,9 @@ def simulate_win_rate(public_cards, hand_cards):
         result["win_rate"] = win_rate / turn_simulate_times
         
     elif len_public_cards == 5:    # Rover
-        result["rank_info"] = get_my_rank(public_cards, hand_cards)
+        result["rank_info"] = get_my_cards_rank(public_cards, hand_cards)
         result["win_rate"] = get_win_rate(public_cards, hand_cards, result["rank_info"])
     
     return result
+    
     
