@@ -180,7 +180,7 @@ def get_seven_set_rank(cards_info):
     
     if flush_info["suit"]:
         flush_straight_info = cards_info["flush_straight"]
-        if not flush_straight_info:
+        if flush_straight_info:
             if flush_straight_info == 14:
                 cards_rank["rank"] = CARD_ROYAL_FLUSH
             else:
@@ -189,7 +189,7 @@ def get_seven_set_rank(cards_info):
         else:
             cards_rank["rank"] = CARD_FLUSH
             cards_rank["info"] = [get_card_value(x) for x in cards_info["flush"]["cards"][0:5]]
-    elif not straight_info:
+    elif straight_info:
         cards_rank["rank"] = CARD_STRAIGHT
         cards_rank["info"] = [straight_info]
     else:
@@ -217,7 +217,7 @@ def get_six_set_rank(cards_info):
     
     if flush_info["suit"]:
         flush_straight_info = cards_info["flush_straight"]
-        if not flush_straight_info:
+        if flush_straight_info:
             if flush_straight_info == 14:
                 cards_rank["rank"] = CARD_ROYAL_FLUSH
             else:
@@ -226,7 +226,7 @@ def get_six_set_rank(cards_info):
         else:
             cards_rank["rank"] = CARD_FLUSH
             cards_rank["info"] = [get_card_value(x) for x in cards_info["flush"]["cards"][0:5]]
-    elif not straight_info:
+    elif straight_info:
         cards_rank["rank"] = CARD_STRAIGHT
         cards_rank["info"] = [straight_info]
     else:
@@ -256,7 +256,7 @@ def get_five_set_rank(cards_info):
     
     if flush_info["suit"]:
         flush_straight_info = cards_info["flush_straight"]
-        if not flush_straight_info:
+        if flush_straight_info:
             if flush_straight_info == 14:
                 cards_rank["rank"] = CARD_ROYAL_FLUSH
             else:
@@ -265,7 +265,7 @@ def get_five_set_rank(cards_info):
         else:
             cards_rank["rank"] = CARD_FLUSH
             cards_rank["info"] = [get_card_value(x) for x in cards_info["flush"]["cards"][0:5]]
-    elif not straight_info:
+    elif straight_info:
         cards_rank["rank"] = CARD_STRAIGHT
         cards_rank["info"] = [straight_info]
     elif cards_info["two"]:
