@@ -145,19 +145,19 @@ def get_flush_info(cards):
 
 
 def get_straight_info(cards_value):
-    straight_arr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    
+    cards_bit = 0
     for x in cards_value:
-        straight_arr[x] = 1
+        cards_bit = cards_bit | (1 << x)
     
-    if straight_arr[14]:
-        straight_arr[1] = 1
+    if cards_bit & 0x4000:
+        cards_bit = cards_bit | 0x0002
     
-    straight_sum = sum(straight_arr[0:5])
+    straight_key = 0x7C00
     for i in range(10):
-        straight_sum = straight_sum - straight_arr[i] + straight_arr[i+5]
-        if straight_sum == 5:
-            return i + 5
+        if straight_key & cards_bit == straight_key:
+            return 14 - i
+        else:
+            cards_bit = cards_bit << 1
     
     return 0
 
@@ -454,7 +454,7 @@ def simulate_win_rate(public_cards, hand_cards):
         "rank_info" : {}
     }
     
-    simulated_times = 100
+    simulated_times = 1081
     
     known_cards = public_cards + hand_cards
     all_cards_term = map_card_term_to_num.keys()
